@@ -4,6 +4,9 @@ frameworkVersion: '3'
 provider:
   name: aws
   runtime: nodejs12.x
+  environment:
+    user_pool_id: us-west-1_IaCJTyMlj
+    client_id: 135379iid8bvqq8em4l3ffem8u
   stage: dev
   region: us-west-1
 plugins:
@@ -47,7 +50,7 @@ functions:
           method: get
           path: /rides
   loginUser:
-    handler: handler.loginUser
+    handler: user/handler.loginUser
     iamRoleStatements:
       - Effect: Allow
         Action:
@@ -62,7 +65,7 @@ functions:
           path: user/login
           cors: true
   signupUser:
-    handler: handler.signupUser
+    handler: user/handler.signupUser
     iamRoleStatements:
       - Effect: Allow
         Action:
