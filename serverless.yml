@@ -1,0 +1,115 @@
+service: crides1
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  region: us-west-1
+plugins:
+  - serverless-iam-roles-per-function
+
+functions:
+  createRide:
+    handler: handler.createRide
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:us-west-1:008608364179:table/ridesTable
+    events:
+      - http:
+          method: post
+          path: /rides
+  updateRide:
+    handler: handler.updateRide
+    events:
+      - http:
+          method: put
+          path: /rides/{id}
+  deleteRide:
+    handler: handler.deleteRide
+    events:
+      - http:
+          method: delete
+          path: /rides/{id}
+  getAllRides:
+    handler: handler.getAllRides
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+        Resource:
+          - arn:aws:dynamodb:us-west-1:008608364179:table/ridesTable
+    events:
+      - http:
+          method: get
+          path: /rides
+  loginUser:
+    handler: handler.loginUser
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - cognito-idp:AdminInitiateAuth
+          - cognito-idp:AdminCreateUser
+          - cognito-idp:AdminSetUserPassword
+        Resource:
+          - "*"
+    events:
+      - http:
+          method: post
+          path: user/login
+          cors: true
+  signupUser:
+    handler: handler.signupUser
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - cognito-idp:AdminInitiateAuth
+          - cognito-idp:AdminCreateUser
+          - cognito-idp:AdminSetUserPassword
+        Resource:
+          - "*"
+    events:
+      - http:
+          method: post
+          path: user/signup
+          cors: true
+
+
+resources:
+  Resources:
+    ridesTable:
+     Type: AWS::DynamoDB::Table
+     Properties:
+       TableName: ridesTable
+       BillingMode: PAY_PER_REQUEST
+       AttributeDefinitions:
+        - AttributeName: rideId
+          AttributeType: S
+       KeySchema:
+        - AttributeName: rideId
+          KeyType: HASH
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: userPool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+            RequireLowercase: False
+            RequireNumbers: True
+    CognitoUserPoolClient:
+        Type: AWS::Cognito::UserPoolClient
+        Properties:
+          ClientName: userPoolClient
+          UserPoolId:
+            Ref: CognitoUserPool
+          ExplicitAuthFlows:
+              - ADMIN_NO_SRP_AUTH
+          GenerateSecret: false  
