@@ -1,4 +1,4 @@
-service: crides1
+service: crides2
 frameworkVersion: '3'
 
 provider:
@@ -24,7 +24,19 @@ functions:
     events:
       - http:
           method: post
-          path: /rides
+          path: /ride
+  createDriver:
+    handler: handler.createDriver
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:us-west-1:008608364179:table/driverTable
+    events:
+      - http:
+          method: post
+          path: /driver
   updateRide:
     handler: handler.updateRide
     events:
@@ -43,6 +55,7 @@ functions:
       - Effect: Allow
         Action:
           - dynamodb:Scan
+          - dynamodb:Query
         Resource:
           - arn:aws:dynamodb:us-west-1:008608364179:table/ridesTable
     events:
@@ -79,8 +92,6 @@ functions:
           method: post
           path: user/signup
           cors: true
-
-
 resources:
   Resources:
     ridesTable:
@@ -89,10 +100,25 @@ resources:
        TableName: ridesTable
        BillingMode: PAY_PER_REQUEST
        AttributeDefinitions:
-        - AttributeName: rideId
+        - AttributeName: fromCity
+          AttributeType: S
+        - AttributeName: toCity
           AttributeType: S
        KeySchema:
-        - AttributeName: rideId
+        - AttributeName: fromCity
+          KeyType: HASH
+        - AttributeName: toCity
+          KeyType: RANGE
+    driverTable:
+     Type: AWS::DynamoDB::Table
+     Properties:
+       TableName: driverTable
+       BillingMode: PAY_PER_REQUEST
+       AttributeDefinitions:
+        - AttributeName: driverMobile
+          AttributeType: S
+       KeySchema:
+        - AttributeName: driverMobile
           KeyType: HASH
     CognitoUserPool:
       Type: AWS::Cognito::UserPool
