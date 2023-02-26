@@ -62,6 +62,36 @@ functions:
       - http:
           method: get
           path: /rides
+  bookRide:
+    handler: handler.bookRide
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+          - dynamodb:Query
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:us-west-1:008608364179:table/driverTable
+    events:
+      - http:
+          method: post
+          path: /bookRide
+
+  driverPaymentOnboarding:
+    handler: handler.driverPaymentOnboarding
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Scan
+          - dynamodb:Query
+          - dynamodb:PutItem
+        Resource:
+          - arn:aws:dynamodb:us-west-1:008608364179:table/driverTable
+    events:
+      - http:
+          method: post
+          path: /dponb
+
   loginUser:
     handler: user/handler.loginUser
     iamRoleStatements:
